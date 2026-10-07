@@ -27,10 +27,24 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
       - name: Prepare blog files
+        env:
+          RELEASE_VERSION: ${{ github.event.release.tag_name }}
         run: |
           mkdir _site
           cp index.html style.css site.js _site/
           touch _site/.nojekyll
+          python3 - <<'PYTHON'
+          import os
+          from pathlib import Path
+          from urllib.parse import quote
+
+          version = quote(os.environ['RELEASE_VERSION'], safe='')
+          page = Path('_site/index.html')
+          html = page.read_text()
+          html = html.replace('./style.css', './style.css?v=' + version)
+          html = html.replace('./site.js', './site.js?v=' + version)
+          page.write_text(html)
+          PYTHON
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

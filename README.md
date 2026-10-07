@@ -30,7 +30,7 @@ python3 -m http.server 5186 --bind 127.0.0.1
 
 首次上线需要先把页面和工作流推送到远端，再创建包含这些文件的版本 tag 并发布正式 Release。Release 需要关联 tag；可以在 GitHub 创建 Release 时同时创建 tag。
 
-仅发布 `index.html`、`style.css` 和 `site.js`。不向网站发布 README、Git 信息或工作流文件。
+发布时为样式和脚本链接附加当前 Release 版本，避免浏览器混用新页面与旧资源。仅发布 `index.html`、`style.css` 和 `site.js`。不向网站发布 README、Git 信息或工作流文件。
 
 ## 内容维护
 
