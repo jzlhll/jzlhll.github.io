@@ -7,7 +7,7 @@
 | 游戏 | 固定源码 | 访问地址 |
 | --- | --- | --- |
 | 四季车途 | `v1.0.8`，`2103681e4503fe0ba7706ec5ccb0085ada12290b` | `https://jzlhll.github.io/games/cargame/` |
-| 英语空战 | `codex/english-air-combat`，程序 `v1.0.9`，`b7fc70a6ebdf4aaf66e32ad009cd0d225d931d3e` | `https://jzlhll.github.io/games/english/` |
+| 英语空战 | `codex/english-air-combat`，程序 `v1.1.0`，`45acc45bfb27b43edaaeccc91c2a18764cf80467` | `https://jzlhll.github.io/games/english/` |
 
 `games.json` 记录仓库、完整提交 SHA、程序版本与唯一目录，打包不读取分支最新代码。英语程序版本不表示已有同名正式 Release。原地址 `https://jzlhll.github.io/HtmlCarGame/` 继续由游戏仓库已有 Pages 站点提供。
 
