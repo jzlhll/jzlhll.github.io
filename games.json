@@ -12,8 +12,8 @@
       "id": "english",
       "name": "英语空战",
       "repository": "https://github.com/jzlhll/HtmlCarGame.git",
-      "commit": "45acc45bfb27b43edaaeccc91c2a18764cf80467",
-      "version": "v1.1.0",
+      "commit": "10a6ffe234a8819d282dd4592dbf7120359a7340",
+      "version": "v1.2.0",
       "path": "games/english"
     }
   ]
