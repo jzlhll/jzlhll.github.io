@@ -1,0 +1,20 @@
+{
+  "games": [
+    {
+      "id": "cargame",
+      "name": "四季车途",
+      "repository": "https://github.com/jzlhll/HtmlCarGame.git",
+      "commit": "2103681e4503fe0ba7706ec5ccb0085ada12290b",
+      "version": "v1.0.8",
+      "path": "games/cargame"
+    },
+    {
+      "id": "english",
+      "name": "英语空战",
+      "repository": "https://github.com/jzlhll/HtmlCarGame.git",
+      "commit": "b7fc70a6ebdf4aaf66e32ad009cd0d225d931d3e",
+      "version": "v1.0.9",
+      "path": "games/english"
+    }
+  ]
+}

@@ -1,56 +1,31 @@
 # 多游戏分支与 GitHub Pages 发布约定
 
-## 维护方式
+## 站点与固定版本
 
-博客继续独立维护在 `jzlhll/jzlhll.github.io`，通过首页 `#games` 的「小游戏列表」展示全部游戏。游戏代码统一维护在 `jzlhll/HtmlCarGame`，不同游戏使用不同的长期分支。
+博客和两个子游戏统一由 `jzlhll/jzlhll.github.io` 部署。博客小游戏分类指向 `#games`，作品卡片分别进入并列子目录。游戏源码仍独立维护在 `jzlhll/HtmlCarGame` 的不同分支，禁止将整款游戏合并到另一款游戏分支。
 
-一个仓库只有一个 GitHub Pages 站点，不会为每个分支自动生成独立网站。多个游戏通过同一个站点下的不同路径访问，由统一发布流程组装并部署。
+| 游戏 | 固定源码 | 访问地址 |
+| --- | --- | --- |
+| 四季车途 | `v1.0.8`，`2103681e4503fe0ba7706ec5ccb0085ada12290b` | `https://jzlhll.github.io/games/cargame/` |
+| 英语空战 | `codex/english-air-combat`，程序 `v1.0.9`，`b7fc70a6ebdf4aaf66e32ad009cd0d225d931d3e` | `https://jzlhll.github.io/games/english/` |
 
-## 分支与访问路径
+`games.json` 记录仓库、完整提交 SHA、程序版本与唯一目录，打包不读取分支最新代码。英语程序版本不表示已有同名正式 Release。原地址 `https://jzlhll.github.io/HtmlCarGame/` 继续由游戏仓库已有 Pages 站点提供。
 
-| 分支 | 游戏 | 访问地址 | 正式版本 tag |
-| --- | --- | --- | --- |
-| `main` | 四季车途 | `https://jzlhll.github.io/HtmlCarGame/` | `car-v1.0.1` 等 |
-| `game-snake` | 贪吃蛇（示例） | `https://jzlhll.github.io/HtmlCarGame/snake/` | `snake-v1.0.0` 等 |
-| `game-puzzle` | 拼图（示例） | `https://jzlhll.github.io/HtmlCarGame/puzzle/` | `puzzle-v1.0.0` 等 |
+## 打包与发布
 
-后两项仅用于说明命名与路径，不代表已经创建或上线。四季车途保留现有根路径，避免已有链接失效；其他游戏各自占用唯一子目录。游戏资源使用相对路径，确保在子目录中正常加载。
+运行 `node scripts/prepare-site.mjs`，从公开仓库获取固定提交，在 `.game-sources` 安装各版本锁定依赖，调用对应版本的 `scripts/prepare-pages.mjs`，将静态包分别复制到 `_site/games/cargame` 和 `_site/games/english`，再加入博客入口、样式、脚本与清单。生成目录已忽略，不提交 Git。任一游戏打包失败会阻止上传。
 
-所有 tag 在整个仓库中共享命名空间，不属于某个分支。各游戏使用独立的 tag 前缀，tag 指向该游戏分支准备发布的提交。已发布的四季车途 `v1.0.0` 保留，后续可采用 `car-` 前缀。
+每次部署必须包含两款游戏完整静态文件。游戏使用相对模块、Worker 与资源地址，允许从各自子目录加载。博客 Release tag 用于博客缓存版本；游戏打包使用清单中的程序版本，清除博客 tag 的校验环境。
 
-## 正式 Release 发布规则
+`.github/workflows/pages.yml` 仅在博客正式 Release 发布时运行，检出该 Release tag 对应的清单、脚本与入口，一次上传完整 `_site`，通过 `github-pages` 并发组串行部署。普通 commit、push、单独推送 tag、草稿与预发布版本不会更新网站。删除 Release 不会下线网站。
 
-- 普通提交、推送分支、单独创建或推送 tag、Release 草稿、预发布版本均不更新正式站点。
-- 发布正式 Release 才触发更新，根据 tag 前缀识别本次发布的游戏。
-- 每个游戏记录一个已发布的 tag 或完整提交 SHA，以及对应的站点路径；发布清单统一维护并持久保存。
-- 发布某款游戏时，只更新该游戏的版本记录；其他游戏继续使用各自上次发布的版本，不读取它们分支的最新提交。
-- 每次部署都包含全部已发布游戏的完整静态文件，再统一上传一个 Pages 产物；只上传本次游戏会覆盖站点，导致其他游戏消失。
-- 并发发布需要串行处理，基于最新发布清单更新，避免两个发布相互覆盖版本记录。
-- 各游戏的代码、依赖和打包逻辑从对应的固定版本读取；发布清单与统一部署逻辑由发布流程集中管理。
+英语分支工作流只上传 `english-air-combat` 静态包，不执行 Pages 部署，避免覆盖原赛车站点。赛车分支旧流程只影响原项目站点，不自动更新博客固定副本。
 
-例如，发布 `snake-v1.0.1` 时，更新 `/snake/` 的文件；四季车途和拼图仍使用各自已发布版本。工作流内部仍然执行一次包含所有游戏的整体部署。
+## 更新游戏
 
-## 新增游戏流程
+1. 在对应游戏分支完成修改并提交、推送，取得完整 SHA，确认程序与包版本一致。
+2. 在博客 `games.json` 只修改该游戏的提交和程序版本，其他游戏保持原值；新增游戏分配唯一 `games/<id>` 路径并添加作品卡片。
+3. 运行聚合打包，在 `_site` 中预览入口及受影响游戏的子路径加载。
+4. 提交、推送博客变更后，按正式 Release 流程发布博客；准备包和 push 本身不创建 Release。
 
-1. 在游戏仓库创建独立游戏分支，整理该游戏的入口、依赖和静态资源。
-2. 分配唯一的游戏标识、目录与 tag 前缀，并接入统一发布流程。
-3. 确认该游戏在分配的子目录下可运行，发布首个正式 Release。
-4. 在博客 `index.html` 的 `#games` 区域添加作品卡片，按钮指向该游戏地址，并更新作品数量等文案。
-5. 按博客自身的正式 Release 流程发布入口变更。
-
-博客「小游戏」分类入口始终指向 `#games` 列表；只有具体作品卡片的按钮进入游戏。游戏发布与博客发布相互独立，更新已有游戏无需重新发布博客。
-
-不同游戏分支长期独立演进，共用修复按需同步，避免把另一款游戏的完整代码直接合并过来。
-
-## 当前配置与实施边界
-
-本文件记录后续维护约定，尚未实施多游戏聚合发布。
-
-当前游戏仓库的工作流会检出本次 Release 的 tag，只打包其中一款游戏并部署到整个 `/HtmlCarGame/` 站点。直接从其他游戏分支发布，仍可能覆盖四季车途。
-
-发布第二款游戏前，必须先实现上述固定版本清单、多个版本的静态文件组装与统一部署，并使现有四季车途首次进入清单。仅新建分支或更改 tag 名不能完成多游戏部署。
-
-## 官方参考
-
-- [GitHub Pages 概述：每个仓库一个站点](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
-- [使用自定义工作流发布 GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+清单与入口随同一个博客 Release 原子部署。发布前基于博客最新分支处理清单变更，保留其他游戏已经更新的固定提交。

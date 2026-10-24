@@ -1,11 +1,9 @@
 const views = document.querySelectorAll('[data-view]');
 const labels = { home: '首页', android: 'Android 技术', hobbies: '个人爱好', about: '关于这里' };
 
-// 部署后沿用博客所在账号的域名，本机预览保留指定的游戏地址。
-if (location.hostname.endsWith('.github.io')) {
-  for (const link of document.querySelectorAll('[data-game-link]')) {
-    link.href = new URL('/HtmlCarGame/', location.origin).href;
-  }
+// 两款游戏分别使用自己的子路径，完整本机预览沿用同一地址。
+for (const link of document.querySelectorAll('[data-game-link]')) {
+  link.href = new URL(link.dataset.gameLink, location.origin).href;
 }
 
 function showPage() {

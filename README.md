@@ -6,10 +6,10 @@
 
 - 品牌位于主页面左上角；首页以 Android 技术、个人爱好、小游戏三个大块作为分类入口，不使用侧栏或窄屏顶部分类导航。
 - Android 技术和个人爱好目前为预留栏目，显示准备中的说明，不生成虚构文章。
-- 首页保留「自己做的小游戏」展示区；点击「小游戏」大块，通过 `#games` 定位到同一页面的作品卡片，再点击「开始旅途」进入 `https://jzlhll.github.io/HtmlCarGame/`。
+- 首页保留「自己做的小游戏」展示区；点击「小游戏」大块，通过 `#games` 定位到同一页面的作品卡片，再分别进入四季车途或英语空战。
 - 新增游戏时，在 `#games` 区域追加对应作品卡片；「小游戏」大块始终指向作品列表，不直接进入某一款游戏。
-- 游戏作品卡片提供直接进入游戏的按钮。游戏独立维护在 `jzlhll/HtmlCarGame`，发布游戏不会自动修改博客。
-- 部署在 GitHub Pages 时，游戏链接自动沿用博客的账号域名；本机预览使用 jzlhll 的正式地址。
+- 游戏作品卡片提供直接进入游戏的按钮。游戏独立维护在 `jzlhll/HtmlCarGame`，游戏提交不会自动修改已部署的网站。
+- 游戏链接沿用当前网站域名；完整本机预览先聚合打包，再在 `_site` 中启动 HTTP 服务。
 - 支持手机与电脑布局、键盘导航及减少动态效果的系统偏好。
 
 ## 视觉风格
@@ -18,7 +18,7 @@
 
 ## 多游戏维护约定
 
-后续采用不同分支维护不同游戏，并通过同一个游戏 Pages 站点的不同路径访问。分支、tag、固定版本清单与统一发布规则见 [多游戏分支与 Pages 发布约定](docs/game-pages-plan.md)。该方案尚未接入游戏发布流程，发布第二款游戏前需要先完成聚合部署。
+两款游戏从各自固定提交打包，由博客统一部署到 `/games/cargame/` 和 `/games/english/`。清单位于 `games.json`，实现及更新规则见 [多游戏分支与 Pages 发布约定](docs/game-pages-plan.md)。原 `/HtmlCarGame/` 赛车站点保持独立，不由英语分支部署覆盖。
 
 ## 本机预览
 
@@ -30,6 +30,8 @@ python3 -m http.server 5186 --bind 127.0.0.1
 
 浏览器访问 `http://localhost:5186/`。使用 HTTP 预览，结束后按 Ctrl+C 停止服务。
 
+完整预览先运行 `node scripts/prepare-site.mjs`，然后运行 `python3 -m http.server 5280 --bind 127.0.0.1 --directory _site`，访问 `http://localhost:5280/`。打包需要联网，下载清单指定的公开游戏提交及锁定依赖。生成的 `_site` 与 `.game-sources` 不提交。
+
 ## 发布规则
 
 在 GitHub 仓库 Settings → Pages → Build and deployment 中，将 Source 设置为 **GitHub Actions**。如果 github-pages 环境限制了部署分支或 tag，请允许用于发布的 tag。
@@ -38,10 +40,10 @@ python3 -m http.server 5186 --bind 127.0.0.1
 
 首次上线需要先把页面和工作流推送到远端，再创建包含这些文件的版本 tag 并发布正式 Release。Release 需要关联 tag；可以在 GitHub 创建 Release 时同时创建 tag。
 
-发布时为样式和脚本链接附加当前 Release 版本，避免浏览器混用新页面与旧资源。仅发布 `index.html`、`style.css` 和 `site.js`。不向网站发布 README、Git 信息或工作流文件。
+发布时为样式和脚本链接附加当前 Release 版本，避免浏览器混用新页面与旧资源。发布博客入口、样式、脚本、固定版本清单以及两款游戏的完整静态包。不向网站发布 README、Git 信息或工作流文件。
 
 ## 内容维护
 
-`index.html` 维护简介、分类内容、作品及链接；`style.css` 维护布局与响应式样式；`site.js` 维护栏目切换、页面标题和游戏链接。
+`index.html` 维护简介、分类内容、作品及链接；`style.css` 维护布局与响应式样式；`site.js` 维护栏目切换、页面标题和游戏链接。`games.json` 维护游戏完整提交号、程序版本与部署路径，`scripts/prepare-site.mjs` 统一组装网站。
 
 提交邮箱仅在本仓库配置为 `jzl.hll@163.com`，不修改全局 Git 配置。
