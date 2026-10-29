@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Android VectorDrawable Viewer</title>
+<style>
+  body { margin: 0; font-family: -apple-system, sans-serif; background: #f6f6f6; color: #333; }
+  .toolbar { position: sticky; top: 0; background: #eeeeee; padding: 12px 24px; z-index: 10; display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #ddd; }
+  .page-title { padding: 16px 24px 0; font-size: 20px; font-weight: 600; color: #222; text-align: center; }
+  .page-sub { padding: 6px 24px 0; font-size: 13px; color: #888; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, var(--cell-w, 120px)); gap: 8px; padding: 16px 24px; }
+  .cell { width: var(--cell-w, 120px); height: calc(var(--cell-w, 120px) + 40px); border-radius: 4px; display: flex; flex-direction: column; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,.3); overflow: hidden; }
+  .thumb { width: var(--cell-w, 120px); height: var(--cell-w, 120px); display: flex; align-items: center; justify-content: center; flex: 0 0 var(--cell-w, 120px); }
+  /* 背景模式：棋盘格 / 浅 / 深 */
+  .bg-checker .thumb { background-color: #fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+  .bg-light .thumb { background: #fff; }
+  .bg-dark .thumb { background: #222; }
+  .bg-gray .thumb { background: #eeeeee; }
+  .thumb svg { width: calc(var(--cell-w, 120px) - 20px); height: calc(var(--cell-w, 120px) - 20px); }
+  .thumb img { max-width: calc(var(--cell-w, 120px) - 20px); max-height: calc(var(--cell-w, 120px) - 20px); object-fit: contain; }
+  .name { width: var(--cell-w, 120px); height: 40px; font-size: 14px; color: #333; text-align: center; white-space: normal; word-break: break-all; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; background: rgba(255,255,255,.9); padding: 4px 3px; box-sizing: border-box; }
+  .bg-dark .name { color: #eee; background: rgba(0,0,0,.6); }
+  .error { background: #fee; color: #c00; font-size: 11px; padding: 4px; line-height: 1.2; }
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; }
+  .empty-state.hidden { display: none; }
+  .empty-icon { width: 96px; height: 96px; margin-bottom: 24px; color: #bbb; }
+  .empty-title { font-size: 22px; font-weight: 600; color: #333; margin-bottom: 8px; }
+  .empty-desc { font-size: 14px; color: #888; margin-bottom: 24px; max-width: 360px; line-height: 1.6; }
+  .empty-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 24px; background: #2d7d46; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.15); transition: background .15s; }
+  .empty-btn:hover { background: #246939; }
+  .empty-hint { margin-top: 16px; font-size: 12px; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <label for="file" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 16px;background:#2d7d46;color:#fff;border:1px solid transparent;border-radius:6px;cursor:pointer;font-size:14px;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:background .15s;line-height:1;height:36px;box-sizing:border-box;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+    选择文件
+  </label>
+  <input type="file" id="file" multiple accept=".xml,.png,.jpg,.jpeg,.webp" style="display:none;">
+  <span id="count" style="display:none;"></span>
+  <button id="clearBtn" style="display:inline-flex;align-items:center;justify-content:center;padding:7px 16px;background:#f5a623;color:#fff;border:1px solid transparent;border-radius:6px;font-size:14px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.15);margin-left:-8px;line-height:1;height:36px;box-sizing:border-box;">清空</button>
+  <label style="display:flex;align-items:center;gap:6px;font-size:14px;color:#555;margin-left:12px;">
+    尺寸
+    <select id="sizeMode" style="padding:5px 10px;background:#fff;color:#333;border:1px solid #ccc;border-radius:6px;font-size:14px;outline:none;cursor:pointer;">
+      <option value="90">90</option>
+      <option value="120" selected>120</option>
+      <option value="150">150</option>
+    </select>
+  </label>
+  <label style="display:flex;align-items:center;gap:6px;font-size:14px;color:#555;">
+    背景
+    <select id="bgMode" style="padding:5px 10px;background:#fff;color:#333;border:1px solid #ccc;border-radius:6px;font-size:14px;outline:none;cursor:pointer;">
+      <option value="checker">棋盘格</option>
+      <option value="light">浅色</option>
+      <option value="dark">深色</option>
+      <option value="gray">灰色</option>
+    </select>
+  </label>
+  <span style="flex:1"></span>
+</div>
+<div class="page-title">Android VectorDrawable Viewer</div>
+<div id="countSub" class="page-sub" style="display:none;"></div>
+<div id="emptyState" class="empty-state">
+  <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+  <div class="empty-title">还没有文件</div>
+  <div class="empty-desc">点击下方按钮，选择 Android VectorDrawable XML 文件或图片，即可在页面中预览效果。</div>
+  <label for="file" class="empty-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+    选择文件
+  </label>
+  <div class="empty-hint">支持 .xml (VectorDrawable)、.png、.jpg、.webp</div>
+</div>
+<div id="contentArea" style="display:none;">
+  <div id="groupsContainer"></div>
+</div>
+<div id="unsupportedBox" style="display:none; margin: 24px 24px; border-top: 1px solid #555; padding-top: 12px;">
+  <div style="color:#000; font-size:18px; margin-bottom:8px; margin-left:8px;">不支持如下：</div>
+  <div id="unsupportedList"></div>
+</div>
+<script>
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+// 读取 android:xxx 属性，兼容无前缀写法
+function attr(el, name) {
+  return el.getAttribute("android:" + name) || el.getAttribute(name) || "";
+}
+
+// Android 颜色 (#AARRGGBB / #RRGGBB / @color 引用暂不支持) 转 SVG 颜色
+function convertColor(c) {
+  if (!c) return null;
+  c = c.trim();
+  if (c.startsWith("#")) {
+    // #RGB / #ARGB / #RRGGBB / #AARRGGBB
+    if (c.length === 4) {
+      return "#" + c[1]+c[1]+c[2]+c[2]+c[3]+c[3];
+    }
+    if (c.length === 5) {
+      return "#" + c[2]+c[2]+c[3]+c[3]+c[4]+c[4] + (parseInt(c[1]+c[1],16)/255).toFixed(3).replace(/^0\./,".").replace(/^1$/,"");
+    }
+    if (c.length === 7) return c;
+    if (c.length === 9) {
+      const a = parseInt(c.slice(1,3),16)/255;
+      return c.slice(3) + (a < 1 ? (a.toFixed(3).replace(/^0\./,".").replace(/^1$/,"")) : "");
+    }
+  }
+  // 颜色名兜底
+  return c;
+}
+
+// pathData 转 SVG d 属性（Android pathData 与 SVG d 基本兼容）
+function convertPathData(d) {
+  return d;
+}
+
+// 处理 <vector> 根节点
+function buildSVG(vectorEl) {
+  const vw = parseFloat(attr(vectorEl, "viewportWidth")) || 24;
+  const vh = parseFloat(attr(vectorEl, "viewportHeight")) || 24;
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${vw} ${vh}`);
+  svg.setAttribute("xmlns", SVG_NS);
+
+  // 递归处理 group / path
+  function walk(src, parent) {
+    for (const child of Array.from(src.children)) {
+      const tag = child.localName;
+      if (tag === "group") {
+        const g = document.createElementNS(SVG_NS, "g");
+        const name = attr(child, "name");
+        if (name) g.setAttribute("data-name", name);
+        const rot = attr(child, "rotation");
+        const px = attr(child, "pivotX");
+        const py = attr(child, "pivotY");
+        const sx = attr(child, "scaleX");
+        const sy = attr(child, "scaleY");
+        const tx = attr(child, "translateX");
+        const ty = attr(child, "translateY");
+        let tr = "";
+        if (tx || ty) tr += `translate(${tx||0} ${ty||0}) `;
+        if (rot) tr += `rotate(${rot} ${px||0} ${py||0}) `;
+        if (sx || sy) tr += `scale(${sx||1} ${sy||1}) `;
+        if (tr) g.setAttribute("transform", tr.trim());
+        parent.appendChild(g);
+        walk(child, g);
+      } else if (tag === "path") {
+        const p = document.createElementNS(SVG_NS, "path");
+        const d = attr(child, "pathData");
+        if (!d) continue;
+        p.setAttribute("d", convertPathData(d));
+        const fill = convertColor(attr(child, "fillColor"));
+        if (fill) p.setAttribute("fill", fill);
+        else p.setAttribute("fill", "#000");
+        const fillAlpha = attr(child, "fillAlpha");
+        if (fillAlpha && fillAlpha !== "1") p.setAttribute("fill-opacity", fillAlpha);
+        const stroke = convertColor(attr(child, "strokeColor"));
+        if (stroke) p.setAttribute("stroke", stroke);
+        const sw = attr(child, "strokeWidth");
+        if (sw) p.setAttribute("stroke-width", sw);
+        const sa = attr(child, "strokeAlpha");
+        if (sa && sa !== "1") p.setAttribute("stroke-opacity", sa);
+        const lc = attr(child, "strokeLineCap");
+        if (lc) p.setAttribute("stroke-linecap", lc);
+        const lj = attr(child, "strokeLineJoin");
+        if (lj) p.setAttribute("stroke-linejoin", lj);
+        parent.appendChild(p);
+      } else if (tag === "clip-path") {
+        const cp = document.createElementNS(SVG_NS, "clipPath");
+        const p = document.createElementNS(SVG_NS, "path");
+        const d = attr(child, "pathData");
+        if (d) p.setAttribute("d", d);
+        cp.appendChild(p);
+        parent.appendChild(cp);
+      }
+    }
+  }
+  walk(vectorEl, svg);
+  return svg;
+}
+
+// 当前背景模式
+let currentBgMode = "checker";
+
+// 图片格式扩展名
+const IMAGE_EXTS = ["png", "jpg", "jpeg", "webp"];
+
+// 取扩展名（小写，不含点）
+function getExt(name) {
+  const i = name.lastIndexOf(".");
+  return i >= 0 ? name.slice(i+1).toLowerCase() : "";
+}
+
+// 创建一个统一的 cell
+function makeCell(thumbChild, fileName) {
+  const cell = document.createElement("div");
+  cell.className = "cell bg-" + currentBgMode;
+  const thumb = document.createElement("div");
+  thumb.className = "thumb";
+  thumb.appendChild(thumbChild);
+  cell.appendChild(thumb);
+  const name = document.createElement("div");
+  name.className = "name";
+  name.textContent = fileName;
+  cell.appendChild(name);
+  return cell;
+}
+
+// 渲染单个文件，返回 { category, cell, fileName, ext }
+// category: "vector" | "image" | "unsupported"
+async function renderFile(file) {
+  const ext = getExt(file.name);
+
+  // 图片族
+  if (IMAGE_EXTS.includes(ext)) {
+    const url = URL.createObjectURL(file);
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = file.name;
+    return { category: "image", cell: makeCell(img, file.name), fileName: file.name, ext };
+  }
+
+  // xml 族：尝试解析为 vector
+  if (ext === "xml") {
+    try {
+      const text = await file.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, "image/svg+xml");
+      const root = doc.documentElement;
+      const rootTag = root ? root.localName : null;
+      if (rootTag === "vector") {
+        const svg = buildSVG(root);
+        return { category: "vector", cell: makeCell(svg, file.name), fileName: file.name, ext };
+      }
+    } catch (e) {}
+    // xml 但非 vector → 不支持
+    return { category: "unsupported", cell: null, fileName: file.name, ext };
+  }
+
+  // 其他格式一律不支持
+  return { category: "unsupported", cell: null, fileName: file.name, ext };
+}
+
+// 全局累计状态：合并多次导入，按指纹去重
+// 指纹 = name + size + lastModified（浏览器多选模式拿不到完整路径，以此近似同一文件）
+const importedMap = new Map(); // fingerprint -> { category, cell, fileName, ext }
+const unsupportedGroups = {}; // ext -> Set<fileName>
+
+function fileFingerprint(file) {
+  return `${file.name}::${file.size}::${file.lastModified}`;
+}
+
+// 渲染不支持列表（基于累计的 unsupportedGroups）
+function renderUnsupportedList() {
+  const unsupportedBox = document.getElementById("unsupportedBox");
+  const unsupportedList = document.getElementById("unsupportedList");
+  const keys = Object.keys(unsupportedGroups).filter(k => unsupportedGroups[k].size > 0);
+  if (keys.length === 0) {
+    unsupportedBox.style.display = "none";
+    unsupportedList.innerHTML = "";
+    return;
+  }
+  unsupportedList.innerHTML = "";
+  keys.sort().forEach(key => {
+    const groupDiv = document.createElement("div");
+    groupDiv.style.marginBottom = "10px";
+    groupDiv.style.marginLeft = "12px";
+    const title = document.createElement("div");
+    title.style.color = "#000";
+    title.style.fontWeight = "600";
+    title.style.fontSize = "15px";
+    title.style.marginBottom = "4px";
+    title.textContent = `.${key}（${unsupportedGroups[key].size}）`;
+    groupDiv.appendChild(title);
+    const list = document.createElement("div");
+    list.style.color = "#666";
+    list.style.fontSize = "14px";
+    list.style.lineHeight = "1.6";
+    list.style.wordBreak = "break-all";
+    list.style.paddingLeft = "12px";
+    list.textContent = Array.from(unsupportedGroups[key]).join("、");
+    groupDiv.appendChild(list);
+    unsupportedList.appendChild(groupDiv);
+  });
+  unsupportedBox.style.display = "block";
+}
+
+// 渲染支持列表（按类别分组：vector / image）
+function renderSupportedGroups() {
+  const container = document.getElementById("groupsContainer");
+  container.innerHTML = "";
+
+  // 按类别聚合
+  const groups = { vector: [], image: [] };
+  for (const v of importedMap.values()) {
+    if (groups[v.category]) groups[v.category].push(v);
+  }
+
+  const labels = { vector: "VectorDrawable", image: "普通图片" };
+  const order = ["vector", "image"];
+  for (const key of order) {
+    const arr = groups[key];
+    if (arr.length === 0) continue;
+
+    const section = document.createElement("div");
+    section.style.margin = "16px 24px";
+
+    const title = document.createElement("div");
+    title.style.color = "#000";
+    title.style.fontWeight = "600";
+    title.style.fontSize = "16px";
+    title.style.marginBottom = "8px";
+    title.style.marginLeft = "8px";
+    title.textContent = `${labels[key]}（${arr.length}）`;
+    section.appendChild(title);
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    for (const v of arr) {
+      if (v.cell) grid.appendChild(v.cell);
+    }
+    section.appendChild(grid);
+    container.appendChild(section);
+  }
+}
+
+// 更新统计文案
+function updateCount() {
+  const total = importedMap.size;
+  let supported = 0, unsupported = 0;
+  for (const v of importedMap.values()) {
+    if (v.category === "vector" || v.category === "image") supported++;
+    else unsupported++;
+  }
+  document.getElementById("count").textContent = `导入 ${total}，已加载 ${supported}，不支持 ${unsupported}`;
+  const sub = document.getElementById("countSub");
+  if (total > 0) {
+    sub.style.display = "";
+    sub.textContent = `导入 ${total}，已加载 ${supported}，不支持 ${unsupported}`;
+  } else {
+    sub.style.display = "none";
+  }
+}
+
+// 更新空状态显示
+function updateEmptyState() {
+  const empty = document.getElementById("emptyState");
+  const content = document.getElementById("contentArea");
+  if (importedMap.size === 0) {
+    empty.classList.remove("hidden");
+    empty.style.display = "";
+    content.style.display = "none";
+  } else {
+    empty.classList.add("hidden");
+    empty.style.display = "none";
+    content.style.display = "";
+  }
+}
+
+// 清空全部
+function clearAll() {
+  importedMap.clear();
+  for (const k of Object.keys(unsupportedGroups)) delete unsupportedGroups[k];
+  document.getElementById("groupsContainer").innerHTML = "";
+  renderUnsupportedList();
+  updateCount();
+  updateEmptyState();
+}
+
+// 文件选择（合并模式：不清空，按指纹去重新增）
+document.getElementById("file").addEventListener("change", async (e) => {
+  const files = Array.from(e.target.files);
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const fp = fileFingerprint(file);
+    if (importedMap.has(fp)) continue; // 已存在，跳过
+
+    const r = await renderFile(file);
+    if (r.category === "vector" || r.category === "image") {
+      importedMap.set(fp, { category: r.category, cell: r.cell, fileName: r.fileName, ext: r.ext });
+    } else {
+      const key = r.ext || "未知";
+      if (!unsupportedGroups[key]) unsupportedGroups[key] = new Set();
+      unsupportedGroups[key].add(r.fileName);
+      importedMap.set(fp, { category: "unsupported", cell: null, fileName: r.fileName, ext: r.ext });
+    }
+    updateCount();
+  }
+
+  renderSupportedGroups();
+  renderUnsupportedList();
+  updateEmptyState();
+  // 允许再次选择同名文件触发 change
+  e.target.value = "";
+});
+
+// 清空按钮
+document.getElementById("clearBtn").addEventListener("click", clearAll);
+
+// 切换背景模式（实时应用到所有 cell）
+document.getElementById("bgMode").addEventListener("change", (e) => {
+  currentBgMode = e.target.value;
+  document.querySelectorAll(".grid .cell").forEach(cell => {
+    cell.classList.remove("bg-checker", "bg-light", "bg-dark", "bg-gray");
+    cell.classList.add("bg-" + currentBgMode);
+  });
+});
+
+// 切换尺寸（通过 CSS 变量实时生效，无需重渲染）
+document.getElementById("sizeMode").addEventListener("change", (e) => {
+  document.documentElement.style.setProperty("--cell-w", e.target.value + "px");
+});
+</script>
+</body>
+</html>

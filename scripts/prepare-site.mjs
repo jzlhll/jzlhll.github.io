@@ -48,6 +48,7 @@ html = html.replace('./style.css', './style.css?v=' + version).replace('./site.j
 await writeFile(path.join(output, 'index.html'), html);
 for (const file of ['style.css', 'site.js', 'games.json']) await cp(path.join(root, file), path.join(output, file));
 await cp(path.join(root, 'assets'), path.join(output, 'assets'), { recursive: true });
+await cp(path.join(root, 'tools'), path.join(output, 'tools'), { recursive: true });
 await writeFile(path.join(output, '.nojekyll'), '');
 async function size(directory) {
   let bytes = 0, files = 0;

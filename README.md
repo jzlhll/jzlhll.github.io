@@ -6,11 +6,11 @@
 
 首页按以下顺序展示三个栏目：
 
-1. **小工具**：`#tools`，目前收录轻绘，直接进入 https://jzlhll.github.io/MacSimplePaint/ 。轻绘由 `jzlhll/MacSimplePaint` 独立维护和部署，网页源版本为 `webapp1.0`。
+1. **小工具**：`#tools`，目前收录轻绘和 Android VectorDrawable Viewer。轻绘入口为 https://jzlhll.github.io/MacSimplePaint/ ，资源预览器入口为 `/tools/android-vector-drawable-viewer/`。轻绘由 `jzlhll/MacSimplePaint` 独立维护和部署，网页源版本为 `webapp1.0`。
 2. **小游戏**：`#games`，展示四季车途、英语空战和低空穿越，分别进入 `/games/cargame/`、`/games/english/` 和 `/games/flight/`。
 3. **技术与笔记**：`#technology`，位于首页底部，目前没有文章。保留 Android、图形交互、工程工具三张明确标注为“示意图”的占位卡片，不生成虚构文章或阅读入口。
 
-保留关于页面、品牌和深色薄荷绿视觉风格。支持手机与电脑布局、键盘导航，以及减少动态效果的系统偏好。旧 `#android` 和 `#explore` 入口分别定位到技术区和工具区。
+顶部采用紧凑的双栏介绍，品牌栏和介绍区整体高度较原版减少约 30%。工具与小游戏各自使用两列卡片，760px 及以下切换为单列；示例预览框统一为 16:10，图片与 SVG 按比例居中完整显示，空余区域使用背景色补齐；描述、标签和辅助文案较原版加大 2px。保留关于页面、品牌和深色薄荷绿视觉风格。支持手机与电脑布局、键盘导航，以及减少动态效果的系统偏好。旧 `#android` 和 `#explore` 入口分别定位到技术区和工具区。
 
 ## 内容与资源
 
@@ -18,6 +18,7 @@
 - `style.css`：样式与响应式布局。
 - `site.js`：栏目定位、关于页面切换、游戏链接。
 - `assets/`：站点本地图片，轻绘画布示例来自轻绘仓库的 `docs/Quiet Morning.png`。
+- `tools/android-vector-drawable-viewer/index.html`：独立资源预览工具，部署副本来自 `allan-skills/tools/AndroidVectorDrawableViewer.html`，无外部依赖。更新时重新同步该源文件。
 - `games.json`：三款游戏的完整源码提交、程序版本、源码子目录与发布路径。
 - `scripts/prepare-site.mjs`：下载清单中的固定版本，构建三个独立游戏并组装完整站点。
 
@@ -44,6 +45,6 @@ python3 -m http.server 5280 --bind 127.0.0.1 --directory _site
 
 GitHub Pages 的 Source 使用 **GitHub Actions**。`.github/workflows/pages.yml` 在发布正式 Release 时检出该 Release 的 tag，生成并发布完整 `_site`；普通 commit、push、单独推送 tag、草稿和预发布 Release 不更新网站。已有部署任务可以重新运行。
 
-发布包包含首页、样式、脚本、本地图片、固定版本清单和三款游戏的全部静态资源，不包含 README、Git 元数据或开发文档。样式和脚本附加 Release 版本以避免缓存混用。单次部署完整替换站点，保留三个游戏的独立子路径；轻绘 Pages 独立发布。
+发布包包含首页、样式、脚本、本地图片、独立工具、固定版本清单和三款游戏的全部静态资源，不包含 README、Git 元数据或开发文档。样式和脚本附加 Release 版本以避免缓存混用。单次部署完整替换站点，保留三个游戏的独立子路径；轻绘 Pages 独立发布。
 
 提交邮箱仅在本仓库配置为 `jzl.hll@163.com`，不修改全局 Git 配置。
