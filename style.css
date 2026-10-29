@@ -28,6 +28,11 @@ main { outline: none; }
 .about-link { padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; color: #b8c8db; font-size: 14px; transition: color .2s, border-color .2s; }
 .about-link span { margin-left: 12px; color: var(--accent); }
 .about-link:hover { color: var(--accent); border-color: #67e8df66; }
+.topbar { gap: 12px; }
+.topbar-meta { display: flex; align-items: center; gap: 12px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.language-picker select { width: 110px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; }
+.language-picker select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 .hero { display: grid; grid-template-columns: 1.3fr 1fr; align-items: end; gap: 40px; padding: 42px 0 40px; }
 .eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; color: var(--accent); font: 13px/1.4 var(--mono); letter-spacing: .6px; }
@@ -47,10 +52,16 @@ h1 { margin: 0; font-size: 38px; line-height: 1.38; letter-spacing: -1.2px; font
 .section-note { color: #8197b0; font-size: 13px; letter-spacing: .5px; }
 .featured { scroll-margin-top: 24px; margin: 38px 0 42px; }
 .tools-section { margin-top: 0; }
-.project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 22px; }
+.project-column { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+html[lang="en"] .tool-feature .game-description h3 > span, html[lang="en"] #games .game-description h3 > span { display: none; }
 .game-feature { display: flex; flex-direction: column; min-width: 0; border: 1px solid #2a3e57; border-radius: 12px; overflow: hidden; background: var(--panel); }
 .road-art { position: relative; aspect-ratio: 16 / 10; flex: 0 0 auto; overflow: hidden; background: #0d1b30; border-bottom: 1px solid #2a3e57; }
 .road-art svg { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+.screenshot-art { background: #282a36; }
+.screenshot-art img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.feature-list { margin: 12px 0 0; padding-left: 19px; color: var(--muted); font-size: 14px; line-height: 1.75; }
+.feature-list li + li { margin-top: 8px; }
 .art-label { position: absolute; z-index: 1; top: 16px; left: 20px; color: #c2d6db; font-size: 13px; line-height: 1.65; letter-spacing: .5px; }
 .season-dots { position: absolute; z-index: 1; bottom: 14px; left: 20px; display: flex; align-items: center; gap: 5px; }
 .season-dots i { width: 6px; height: 6px; background: #67e8df; border-radius: 1px; }
@@ -112,7 +123,7 @@ footer { display: flex; justify-content: space-between; gap: 18px; padding: 22px
   .page-shell { padding: 0 32px; }.hero { gap: 26px; }h1 { font-size: 36px; }
   .section-note { display: none; }.game-description { padding: 20px; }
 }
-@media (max-width: 800px) { .page-shell { padding: 0 26px; }h1 { font-size: 33px; }.project-grid { gap: 18px; }.paint-toolbar-name { display: none; } }
+@media (max-width: 800px) { .page-shell { padding: 0 26px; }h1 { font-size: 33px; }.project-grid, .project-column { gap: 18px; }.paint-toolbar-name { display: none; } }
 @media (max-width: 760px) {
   .hero { grid-template-columns: 1fr; gap: 20px; padding: 28px 0 30px; }.hero-description { max-width: 560px; }
   .hero-details { padding-bottom: 0; }.section-links { margin-top: 14px; }
@@ -121,6 +132,7 @@ footer { display: flex; justify-content: space-between; gap: 18px; padding: 22px
   .technology-grid { gap: 12px; }.technology-copy { padding: 15px; }
 }
 @media (max-width: 580px) {
+  .topbar-meta { gap: 8px; }.language-picker select { width: 90px; font-size: 13px; padding: 7px; }
   .page-shell { padding: 0 22px; }.topbar { min-height: 70px; padding: 13px 0; }
   .brand { font-size: 20px; gap: 10px; }.brand-mark { width: 34px; height: 34px; font-size: 23px; }.brand-subtitle { font-size: 11px; letter-spacing: 1.5px; }
   .about-link { font-size: 13px; padding: 7px 10px; }.about-link span { margin-left: 6px; }

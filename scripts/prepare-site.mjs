@@ -44,9 +44,9 @@ for (const game of games) {
 }
 const version = encodeURIComponent(process.env.RELEASE_VERSION || 'preview');
 let html = await readFile(path.join(root, 'index.html'), 'utf8');
-html = html.replace('./style.css', './style.css?v=' + version).replace('./site.js', './site.js?v=' + version);
+html = html.replace('./style.css', './style.css?v=' + version).replace('./i18n.js', './i18n.js?v=' + version).replace('./site.js', './site.js?v=' + version);
 await writeFile(path.join(output, 'index.html'), html);
-for (const file of ['style.css', 'site.js', 'games.json']) await cp(path.join(root, file), path.join(output, file));
+for (const file of ['style.css', 'i18n.js', 'site.js', 'games.json']) await cp(path.join(root, file), path.join(output, file));
 await cp(path.join(root, 'assets'), path.join(output, 'assets'), { recursive: true });
 await cp(path.join(root, 'tools'), path.join(output, 'tools'), { recursive: true });
 await writeFile(path.join(output, '.nojekyll'), '');
