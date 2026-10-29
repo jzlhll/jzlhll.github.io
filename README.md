@@ -1,49 +1,49 @@
 # Allan · 代码与生活
 
-独立个人博客，远端仓库为 `jzlhll/jzlhll.github.io`，网站地址为 `https://jzlhll.github.io/`。使用原生 HTML、CSS 和 JavaScript，无构建步骤、无后台、无第三方资源加载。
+个人作品与笔记站点，仓库为 `jzlhll/jzlhll.github.io`，网站地址为 https://jzlhll.github.io/ 。使用原生 HTML、CSS 和 JavaScript，无后台或第三方字体、图片加载。
 
-## 页面与入口
+## 首页结构
 
-- 品牌位于主页面左上角；首页以 Android 技术、个人爱好、小游戏三个大块作为分类入口，不使用侧栏或窄屏顶部分类导航。
-- Android 技术和个人爱好目前为预留栏目，显示准备中的说明，不生成虚构文章。
-- 首页保留「自己做的小游戏」展示区；点击「小游戏」大块，通过 `#games` 定位到同一页面的作品卡片，再分别进入四季车途或英语空战。
-- 新增游戏时，在 `#games` 区域追加对应作品卡片；「小游戏」大块始终指向作品列表，不直接进入某一款游戏。
-- 游戏作品卡片提供直接进入游戏的按钮。游戏独立维护在 `jzlhll/HtmlCarGame`，游戏提交不会自动修改已部署的网站。
-- 游戏链接沿用当前网站域名；完整本机预览先聚合打包，再在 `_site` 中启动 HTTP 服务。
-- 支持手机与电脑布局、键盘导航及减少动态效果的系统偏好。
+首页按以下顺序展示三个栏目：
 
-## 视觉风格
+1. **小工具**：`#tools`，目前收录轻绘，直接进入 https://jzlhll.github.io/MacSimplePaint/ 。轻绘由 `jzlhll/MacSimplePaint` 独立维护和部署，网页源版本为 `webapp1.0`。
+2. **小游戏**：`#games`，展示四季车途、英语空战和低空穿越，分别进入 `/games/cargame/`、`/games/english/` 和 `/games/flight/`。
+3. **技术与笔记**：`#technology`，位于首页底部，目前没有文章。保留 Android、图形交互、工程工具三张明确标注为“示意图”的占位卡片，不生成虚构文章或阅读入口。
 
-个人开发者博客采用深色背景、柔和的薄荷绿点缀与简洁卡片，首页保留自然的自我介绍。分类图标与小游戏封面使用本地内联 SVG，不加载外部字体或图片。手机布局依次展示简介和分类；支持键盘焦点及减少动态效果的系统偏好。
+保留关于页面、品牌和深色薄荷绿视觉风格。支持手机与电脑布局、键盘导航，以及减少动态效果的系统偏好。旧 `#android` 和 `#explore` 入口分别定位到技术区和工具区。
 
-## 多游戏维护约定
+## 内容与资源
 
-两款游戏从各自固定提交打包，由博客统一部署到 `/games/cargame/` 和 `/games/english/`。清单位于 `games.json`，实现及更新规则见 [多游戏分支与 Pages 发布约定](docs/game-pages-plan.md)。原 `/HtmlCarGame/` 赛车站点保持独立，不由英语分支部署覆盖。
+- `index.html`：首页栏目、工具和游戏卡片、关于页面。
+- `style.css`：样式与响应式布局。
+- `site.js`：栏目定位、关于页面切换、游戏链接。
+- `assets/`：站点本地图片，轻绘画布示例来自轻绘仓库的 `docs/Quiet Morning.png`。
+- `games.json`：三款游戏的完整源码提交、程序版本、源码子目录与发布路径。
+- `scripts/prepare-site.mjs`：下载清单中的固定版本，构建三个独立游戏并组装完整站点。
+
+游戏源码独立维护在 `jzlhll/HtmlCarGame`；源码仓库的提交不会自动更新本站固定版本。完整约定见 [game-pages-plan.md](docs/game-pages-plan.md)。
 
 ## 本机预览
 
-在仓库目录运行：
+只查看首页：
 
 ```bash
 python3 -m http.server 5186 --bind 127.0.0.1
 ```
 
-浏览器访问 `http://localhost:5186/`。使用 HTTP 预览，结束后按 Ctrl+C 停止服务。
+完整预览：
 
-完整预览先运行 `node scripts/prepare-site.mjs`，然后运行 `python3 -m http.server 5280 --bind 127.0.0.1 --directory _site`，访问 `http://localhost:5280/`。打包需要联网，下载清单指定的公开游戏提交及锁定依赖。生成的 `_site` 与 `.game-sources` 不提交。
+```bash
+node scripts/prepare-site.mjs
+python3 -m http.server 5280 --bind 127.0.0.1 --directory _site
+```
 
-## 发布规则
+完整打包需要联网，获取固定的公开游戏提交和锁定依赖。生成的 `_site` 与 `.game-sources` 已忽略，不提交。轻绘入口指向已部署的独立站点。
 
-在 GitHub 仓库 Settings → Pages → Build and deployment 中，将 Source 设置为 **GitHub Actions**。如果 github-pages 环境限制了部署分支或 tag，请允许用于发布的 tag。
+## 发布
 
-`.github/workflows/pages.yml` 只在发布正式 Release 时更新网站；检出该 Release 的 tag 对应代码。普通提交、推送、单独创建或推送 tag、保存 Release 草稿、发布预发布版本，均不更新网站。不提供手动发布入口，但管理员仍可重新运行已有任务；删除 Release 不会下线网站，编辑 Release 说明也不触发更新。
+GitHub Pages 的 Source 使用 **GitHub Actions**。`.github/workflows/pages.yml` 在发布正式 Release 时检出该 Release 的 tag，生成并发布完整 `_site`；普通 commit、push、单独推送 tag、草稿和预发布 Release 不更新网站。已有部署任务可以重新运行。
 
-首次上线需要先把页面和工作流推送到远端，再创建包含这些文件的版本 tag 并发布正式 Release。Release 需要关联 tag；可以在 GitHub 创建 Release 时同时创建 tag。
-
-发布时为样式和脚本链接附加当前 Release 版本，避免浏览器混用新页面与旧资源。发布博客入口、样式、脚本、固定版本清单以及两款游戏的完整静态包。不向网站发布 README、Git 信息或工作流文件。
-
-## 内容维护
-
-`index.html` 维护简介、分类内容、作品及链接；`style.css` 维护布局与响应式样式；`site.js` 维护栏目切换、页面标题和游戏链接。`games.json` 维护游戏完整提交号、程序版本与部署路径，`scripts/prepare-site.mjs` 统一组装网站。
+发布包包含首页、样式、脚本、本地图片、固定版本清单和三款游戏的全部静态资源，不包含 README、Git 元数据或开发文档。样式和脚本附加 Release 版本以避免缓存混用。单次部署完整替换站点，保留三个游戏的独立子路径；轻绘 Pages 独立发布。
 
 提交邮箱仅在本仓库配置为 `jzl.hll@163.com`，不修改全局 Git 配置。

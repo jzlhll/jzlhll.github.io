@@ -15,6 +15,15 @@
       "commit": "71a8ea36fac3e9631796a8bb9adbbe6c2b8a44df",
       "version": "v1.2.1",
       "path": "games/english"
+    },
+    {
+      "id": "flight",
+      "name": "低空穿越",
+      "repository": "https://github.com/jzlhll/HtmlCarGame.git",
+      "commit": "d750518056c958ba2573f89f1950047f98734b39",
+      "version": "v1.0.1",
+      "source_directory": "low-altitude-flight",
+      "path": "games/flight"
     }
   ]
 }
